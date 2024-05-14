@@ -1,0 +1,55 @@
+.btn-hover:hover{
+    border: 1px solid rgba(0, 0, 0, 0.608);
+    background-color: rgba(234, 234, 234, 0.196);
+}
+
+@media(max-width:650px){
+    .buscador{
+        display: none !important;
+        width: 50px !important;
+    }
+}
+.micarrito{
+    display: none;
+}
+@media(min-width:650px){
+    .micarrito{
+        display: inline;
+    }
+}
+
+.buscador{
+    width: 300px ;
+}
+
+.card img{
+    width: 100%;
+}
+
+.card {
+    max-width: 400px;
+    border: none;
+    *{
+        border: none;
+    }
+}
+
+.card:hover{
+    border: 1px solid rgba(132, 132, 132, 0.478);
+}
+.navbar{
+    background-color: rgb(255, 255, 255);
+    box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+main{
+    margin-top: 3em;
+}
+
+
+
+
+
+
+
+
