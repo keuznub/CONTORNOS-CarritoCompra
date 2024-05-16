@@ -12,6 +12,96 @@
 </head>
 
 <body>
+    <?php
+    session_start();
+    if(isset($_POST["destroy"])){
+        session_destroy();
+        session_start();
+    }
+
+    $admin = false;
+    $idUsuario = null;
+    $conexion = null;
+    $categoria = null;
+    $arrayProductos = array();
+    $defaultCategoria = "procesador";
+    
+
+    try{
+        $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
+    }catch(Exception $E){
+        header("Location: oops.html");
+        die;
+    }
+    
+
+
+    if(!isset($_SESSION["categoria"])){
+        $categoria = $defaultCategoria;
+        $_SESSION["categoria"] = $categoria;
+    }else{
+        $categoria = $_SESSION["categoria"];
+    }
+
+    if(!isset($_SESSION["tipoUsuario"])){
+        $_SESSION["tipoUsuario"] = "cliente";
+    }else{
+        if($_SESSION["tipoUsuario"] == "admin"){
+        $admin = true;
+        }
+    }
+
+    if(isset($_POST["idUsuario"])){
+        $idUsuario = $_SESSION["idUsuario"];
+    }
+
+    //PRODUCTO CLASE
+    class Producto{
+        private int $id;
+        private string $nombre, $descripcion,$categoria, $imagen;
+        private float $valor;
+
+        function __construct($id, $nombre, $descripcion, $valor, $categoria, $imagen){
+            $this->id = $id;
+            $this->nombre = $nombre;
+            $this->descripcion = $descripcion;
+            $this->valor = $valor;
+            $this->categoria = $categoria;
+            $this->imagen = $imagen;
+        }
+
+        function getId(){
+            return $this->id;
+        }
+        function getNombre(){
+            return $this->nombre;
+        }
+        function getDescripcion(){
+            return $this->descripcion;
+        }
+        function getValor(){
+            return $this->valor;
+        }
+        function getCategoria(){
+            return $this->categoria;
+        }
+        function getImagen(){
+            return $this->imagen;
+        }
+    }
+//END PRODUCTO CLASE
+
+    $statement = $conexion->prepare("SELECT * FROM productos WHERE categoria = ?");
+    $statement->bind_param("s", $categoria);
+    $statement->execute();
+    $result = $statement->get_result();
+    while ($row = $result->fetch_row()){
+    $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4],  base64_encode($row[5]));
+    array_push($arrayProductos, $producto);
+    }
+
+
+    ?>
     <header>
         <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
@@ -164,62 +254,37 @@
             </div>
         </nav>
     </header>
-    <main class="py-5">
-
-        <div class="row me-4 ms-4 producto">
-            <div class="col-lg-8  col-12 ms-auto columna1">
-                <div class="row row-cols-1 me-auto ms-auto">
-                    <div class="col d-flex justify-content-center imagen">
-                        <img src="../imagen/p1.png" width="80%" alt="">
-                    </div>
-                    <hr>
-                    <div class="col mt-5 ms-auto especificaciones list-group">
-                        <div class="list-group-item">
-                            <span class="h4">$NOmbre producto</span>
-                        </div>
-                        <div class="list-group-item">
-                            <span>$Descripcion producto</span>
-                        </div>
-                    </div>
-                    <hr>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-12 columna2 px-5">
-                    <strong>Precio:</strong>
-                    <br>
-                    <b class="subtotal">$valor</b>
-                    <div class="row precioArriba">
-                        <div class="col-12 text-center mt-4">
-                            <form action="" method="post">
-                                <input type="submit" class="btn btn-primary" name="" id="" value="Añadir a Carrito"
-                                    style="width: 100%;">
-                            </form>
-                        </div>
-                    </div>
-            </div>
-
-            <div class="resumen  col-12 precioAbajo sticky-bottom">
-                
-                    <div class="row">
-                        <div class="col-12 text-center">
-                            <form action="">
-                                <input type="submit" class="btn btn-primary" name="" id="" value="Añadir a Carrito"
-                                    style="width: 100%;">
-                            </form>
-                        </div>
-                    </div>
-                
-
-            </div>
+    <main>
+        <div class="main-head text-center py-4 bg-light">
+            <h5>Catálogo de <?php echo ucfirst($categoria)?></h5>
         </div>
+        <div class="main-body container mt-4">
+            <form class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center" action="producto.html" method="post">
+                <!--PHP ITEMS-->
+                <?php foreach($arrayProductos as $i):?>
+                <a class="item col card mb-5" href="producto.html">
+                    <div class="card-header">
+                        <img class="image" src="data:image/png;base64,<?php echo $i->getImagen(); ?>" alt="">
+                    </div>
+                    <div class="card-body">
+                        <p class="h5"><?php echo $i->getNombre() ?></p>
+                        <p><?php echo $i->getDescripcion() ?></p>
+                        <b style="color: red;"><?php echo $i->getValor() ?></b>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+                <!--PHP END-->
+            </form>
         </div>
 
     </main>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
-
+<footer>
+    <form action="" method="post">
+        <input type="submit" name="destroy" value="Destruir sesion">
+    </form>
+</footer>
 </html>
