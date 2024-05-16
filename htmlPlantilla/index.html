@@ -12,24 +12,25 @@
 </head>
 
 <body>
+
     <header>
-        <nav class="navbar navbar-expand-lg fixed-top">
+        <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
                 <div>
                     <a class="navbar-brand" href="#">Catologo</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasCatalogos" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                 </div>
-                
-                    <form action="" method="post" class="input-group buscador">
-                        <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2"
-                            size="20">
-                        <input class="input-group-text" type="submit" id="basic-addon2" value="Buscar">
-                    </form>
-                
+
+                <form action="" method="post" class="input-group buscador">
+                    <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2"
+                        size="20">
+                    <input class="input-group-text" type="submit" id="basic-addon2" value="Buscar">
+                </form>
+
                 <button class="btn btn-hover" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions"><img
                         src="../imagen/carrito.png" width="20">
@@ -45,8 +46,8 @@
                 <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
                     aria-labelledby="offcanvasWithBothOptionsLabel">
                     <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img
-                            src="../imagen/carrito.png" width="20">Carrito de </h5>
+                        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img src="../imagen/carrito.png"
+                                width="20">Carrito de </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
@@ -57,32 +58,50 @@
                         </ul>
                     </div>
                 </div>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Link</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Dropdown
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                        </li>
-                    </ul>
+                <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasCatalogos"
+                    aria-labelledby="offcanvasCatalogos">
+                    <div class="offcanvas-header justify-content-center">
+                        <button type="button" class="btn-close" id="cierreOffcanvasCatalogo" data-bs-dismiss="offcanvas"
+                            aria-label="Close"></button>
+
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul class="nav flex-column ">
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#">
+                                    <div class="row">
+                                        <div class="col-10">
+                                            <span>Procesadores</span>
+                                        </div>
+                                        <div class="col-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                            </svg>
+                                        </div>
+
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#">
+                                    <div class="row">
+                                        <div class="col-10">
+                                            <span>Placas Base</span>
+                                        </div>
+                                        <div class="col-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                            </svg>
+                                        </div>
+
+                                    </div>
+                                </a>
+                            </li>
+                    </div>
                 </div>
             </div>
         </nav>
