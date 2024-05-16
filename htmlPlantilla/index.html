@@ -12,12 +12,13 @@
 </head>
 
 <body>
-
     <header>
         <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
                 <div>
-                    <a class="navbar-brand" href="#">Catologo</a>
+                    <a class="navbar-brand" href="#">
+                        <img src="../imagen/bcComponentes.png" alt="" style="width:40px;">
+                        <span>BComponentes</span></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#offcanvasCatalogos" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -52,20 +53,76 @@
                     </div>
                     <div class="offcanvas-body">
                         <ul class="list-group">
-                            <li class="list-group-item">
-                                item1
+                            <!--PHP-->
+                            <li class="list-group-item mb-3">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <div class="h4">titulo producto</div>
+                                    </div>
+                                    <div class="col-2 text-end">
+                                        <div class="">x<span class="cantidad">1</span></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-7">
+                                        <span class="description">
+                                            Descripcion del producto
+                                        </span>
+                                    </div>
+                                    <div class="col-5 d-flex justify-content-end">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <button type="button" class="btn me-2"><img
+                                                    src="../imagen/basura.png" width="20px" alt=""></button>
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
+                            <!--ENDPHP-->
+                            <!--PHP-->
+                            <li class="list-group-item mb-3">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <div class="h4">titulo producto</div>
+                                    </div>
+                                    <div class="col-2 text-end">
+                                        <div class="">x<span class="cantidad">1</span></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-7">
+                                        <span class="description">
+                                            Descripcion del producto
+                                        </span>
+                                    </div>
+                                    <div class="col-5 d-flex justify-content-end">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <button type="button" class="btn me-2"><img
+                                                    src="../imagen/basura.png" width="20px" alt=""></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <!--ENDPHP-->
                         </ul>
+                        <div class="row">
+                            <div class="col-12 text-center mt-4">
+                                <form action="">
+                                    <input type="submit" class="btn btn-primary" name="" id="" value="Ver en Carrito" style="width: 90%;">
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasCatalogos"
                     aria-labelledby="offcanvasCatalogos">
                     <div class="offcanvas-header justify-content-center">
+                        <span class="h5">Productos</span>
                         <button type="button" class="btn-close" id="cierreOffcanvasCatalogo" data-bs-dismiss="offcanvas"
                             aria-label="Close"></button>
 
                     </div>
                     <div class="offcanvas-body">
+                        
                         <ul class="nav flex-column ">
                             <li class="nav-item">
                                 <a class="nav-link" aria-current="page" href="#">
@@ -108,7 +165,7 @@
     </header>
     <main>
         <div class="main-head text-center py-4 bg-light">
-            <h5>Catálogo de productos</h5>
+            <h5>Catálogo de $productos category = $default</h5>
         </div>
         <div class="main-body container">
             <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center">
@@ -117,8 +174,8 @@
                         <img src="../imagen/p1.png" alt="">
                     </div>
                     <div class="card-body">
-                        <p class="h5">Nombre producto</p>
-                        <p>Descripcion producto</p>
+                        <p class="h5">$Nombre producto</p>
+                        <p>$Descripcion producto</p>
                     </div>
                 </div>
 

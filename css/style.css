@@ -3,7 +3,7 @@
     background-color: rgba(234, 234, 234, 0.196);
 }
 
-@media(max-width:650px){
+@media(max-width:750px){
     .buscador{
         display: none !important;
         width: 50px !important;
@@ -54,6 +54,13 @@ nav-link{
     width: 10em !important;
 }
 
+.lupa{
+    background-color: rgba(128, 128, 128, 0.244);
+}
+
+.offcanvas-body ul li{
+    border: none;
+}
 
 
 
