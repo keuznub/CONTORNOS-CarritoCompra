@@ -18,6 +18,21 @@
     }
 }
 
+.precioArriba{
+    display: none;
+}
+.precioAbajo{
+    display: block;
+}
+@media(min-width:992){
+    .precioArriba{
+        display: block;
+    }
+    .precioAbajo{
+        display: none;
+    }
+}
+
 .buscador{
     width: 300px ;
 }
