@@ -13,7 +13,7 @@
 <body>
     <?php
     session_start();
-    if (isset($_POST["destroy"])) {
+    if (isset($_POST["logout"])) {
         session_destroy();
         session_start();
     }
@@ -29,6 +29,8 @@
 
 
 
+
+
     try {
         $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
     } catch (Exception $E) {
@@ -36,6 +38,19 @@
         die;
     }
 
+    if (isset($_POST["login"])) {
+        session_destroy();
+        session_start();
+        $statement = $conexion->prepare("SELECT * FROM usuarios WHERE usuario = ? && contraseña = ?");
+        $statement->bind_param("ss", $_POST["usuario"], $_POST["contraseña"]);
+        $statement->execute();
+        $result = $statement->get_result();
+        if (!$result->num_rows == 0) {
+            $idUsuario = $result->fetch_row()[0];
+        } else {
+            header("Location: login.php?loginFail=true");
+        }
+    }
 
     if (isset($_GET["categoria"])) {
         $_SESSION["categoria"] = $_GET["categoria"];
@@ -54,6 +69,12 @@
     }
     if (isset($_POST["idUsuario"])) {
         $idUsuario = $_SESSION["idUsuario"];
+    }
+    if (!isset($_SESSION["usuario"])) {
+        $usuario = new Usuario(9999, "", "", "anonimo");
+        $_SESSION["usuario"] = $usuario;
+    } else {
+        $usuario = $_SESSION["usuario"];
     }
     if (!isset($_SESSION["arrayCarrito"])) {
         $_SESSION["arrayCarrito"] = $arrayCarrito;
@@ -178,6 +199,13 @@
         }
     }
 
+    if (isset($_POST["deleteProduct"])) {
+        $statement = $conexion->prepare("DELETE FROM productos WHERE id = ?");
+        $statement->bind_param("s", $_POST["listProductID"]);
+        $statement->execute();
+        header("Location: index.php");
+    }
+
     $statement = $conexion->prepare("SELECT * FROM productos WHERE categoria = ?");
     $statement->bind_param("s", $categoria);
     $statement->execute();
@@ -187,7 +215,7 @@
         array_push($arrayProductos, $producto);
     }
 
-    
+
 
     if ($idUsuario != null && isset($_POST["login"])) {
         $statement = $conexion->prepare("SELECT * FROM usuarios WHERE id = ?");
@@ -197,69 +225,42 @@
         while ($row = $result->fetch_row()) {
             $usuario = new Usuario($row[0], $row[1], $row[2], $row[3], $row[4]);
         }
-        $statement = $conexion->prepare("SELECT p.id, p.nombre, p.descripcion, p.valor, c.cantidad
-        FROM productos p JOIN carrito c ON p.id =c.productId;");
+        if ($usuario->getCategoria() == "admin") {
+            $admin = true;
+        }
+        $statement = $conexion->prepare("SELECT p.id, p.nombre, p.descripcion, p.precio, c.cantidad
+        FROM productos p JOIN carrito c ON p.id =c.productId JOIN usuarios u ON c.userId = u.id
+        WHERE u.id = ?;");
         $statement->bind_param("i", $idUsuario);
         $statement->execute();
         $result = $statement->get_result();
         while ($row = $result->fetch_row()) {
             array_push($arrayCarrito, new ProductoEnCarrito($row[0], $row[1], $row[2], $row[3], $row[4]));
         }
+        $_SESSION["usuario"] = $usuario;
         $_SESSION["arrayCarrito"] = $arrayCarrito;
+        header("Location: index.php");
     }
-   
-    if(isset($_POST["delete"])){
-        foreach($arrayCarrito as $i => $v){
-            if($v->getID() == $_POST["deleteProductID"]){
-                if($v->getCantidad()<=1){
-                    unset($arrayCarrito[$i]);
-                }else{
-                    $v->setCantidad($v->getCantidad()-1);
-                }
+
+    if (isset($_POST["delete"])) {
+        $self = $_SERVER["PHP_SELF"];
+        foreach ($arrayCarrito as $i => $v) {
+            if ($v->getID() == $_POST["deleteProductID"]) {
+                unset($arrayCarrito[$i]);
             }
         }
+        if ($usuario->getCategoria() != "anonimo") {
+            $statement = $conexion->prepare("DELETE FROM carrito WHERE (userID = ? AND  productID = ?);");
+            $statement->bind_param("ii", $usuario->getID(), $_POST["deleteProductID"]);
+            $statement->execute();
+        }
+
         $_SESSION["arrayCarrito"] = $arrayCarrito;
         header("Location: $self");
     }
-    
 
-    function selectFromProducto($idProducto, $columna)
-    {
-        $conexion = null;
-        try {
-            $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
-        } catch (Exception $E) {
-            header("Location: oops.html");
-            die;
-        }
-        $statement = $conexion->prepare("SELECT ? FROM productos WHERE id = ?");
-        $statement->bind_param("si", $columna, $idProducto);
-        $statement->execute();
-        $result = $statement->get_result();
-        while ($row = $result->fetch_row()) {
-            return $row[0];
-        }
-        $conexion->close();
-    }
 
-    function selectCantidadFromCarrito($idProducto)
-    {
-        $conexion = null;
-        try {
-            $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
-        } catch (Exception $E) {
-            header("Location: oops.html");
-            die;
-        }
-        $statement = $conexion->prepare("SELECT ? FROM productos WHERE id = ?");
-        $statement->bind_param("si", $columna, $idProducto);
-        $statement->execute();
-        $result = $statement->get_result();
-        while ($row = $result->fetch_row()) {
-            return $row[0];
-        }
-        $conexion->close();
-    }
+
     $conexion->close();
 
     ?>
@@ -267,7 +268,7 @@
         <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
                 <div>
-                    <a class="navbar-brand" href="index.html">
+                    <a class="navbar-brand" href="index.php">
                         <img src="../imagen/bcComponentes.png" alt="" style="width:40px;">
                         <span class="nombreLogo">BComponentes</span></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCatalogos" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -294,10 +295,10 @@
 
                 <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
                     <div class="offcanvas-header">
-                        <?php if ($idUsuario == null) : ?>
+                        <?php if ($usuario->getCategoria() == "anonimo") : ?>
                             <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img src="../imagen/carrito.png" width="20">Carrito</h5>
                         <?php endif; ?>
-                        <?php if ($idUsuario != null) : ?>
+                        <?php if ($usuario->getCategoria() != "anonimo") : ?>
                             <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img src="../imagen/carrito.png" width="20">Carrito de <?php echo $usuario->getUsuario() ?></h5>
                         <?php endif; ?>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -325,11 +326,18 @@
                                                 <?php echo $i->getDescripcion() ?>
                                             </span>
                                         </div>
-                                        <div class="col-5 d-flex justify-content-end">
+                                        <div class="col-5 d-flex justify-content-end" style="color:red">
+                                            <b> <?php echo $i->getValor() * $i->getCantidad() ?>€ </b>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col-12 d-flex justify-content-end">
                                             <div class="btn-toolbar" role="toolbar">
-                                                <form action="#" method="post">
-                                                    <input type="submit" name="delete" class="btn me-2"><img src="../imagen/basura.png" width="20px" alt="">
-                                                    <input type="hidden" name="deleteProductID" value="<?php echo $i->getId() ?>" class="btn me-2"><img src="../imagen/basura.png" width="20px" alt="">
+                                                <form action="#" class="deleteForm" method="post">
+                                                    <a class="deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
+                                                    <input type="hidden" name="deleteProductID" class="deleteID" value="<?php echo $i->getId() ?>">
+                                                    <input type="hidden" name="delete">
                                                 </form>
                                             </div>
                                         </div>
@@ -352,13 +360,44 @@
                         <span class="h5">Productos</span>
                         <button type="button" class="btn-close" id="cierreOffcanvasCatalogo" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
-                    <form class="offcanvas-body" name="productosCavasForm" action="index.html" method="post">
-                        <ul class="nav flex-column ">
+
+                    <ul class="nav flex-column ">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="index.php?categoria=procesador">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <span>Procesadores</span>
+                                    </div>
+                                    <div class="col-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                        </svg>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="index.php?categoria=placa Base">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <span>Placas Base</span>
+                                    </div>
+                                    <div class="col-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                        </svg>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </li>
+                        <?php if ($usuario->getCategoria() == "admin") : ?>
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="index.php?categoria=procesador">
+                                <a class="nav-link" aria-current="page" href="admin.php">
                                     <div class="row">
                                         <div class="col-10">
-                                            <span>Procesadores</span>
+                                            <span>Admin Zone</span>
                                         </div>
                                         <div class="col-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
@@ -369,11 +408,15 @@
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="index.php?categoria=placa Base">
-                                    <div class="row">
+                        <?php endif; ?>
+                    </ul>
+                    <ul class="login logout nav flex-colum position-absolute w-100 bottom-0 mb-4">
+                        <?php if ($usuario->getCategoria() == "anonimo") : ?>
+                            <li class="nav-item w-100">
+                                <a class="btn btn-primary" aria-current="page" href="login.php" style="width: 90%;">
+                                    <div class="row" style="width: 100%;">
                                         <div class="col-10">
-                                            <span>Placas Base</span>
+                                            <span>Log In</span>
                                         </div>
                                         <div class="col-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
@@ -384,45 +427,11 @@
                                     </div>
                                 </a>
                             </li>
-                            <?php if ($admin) : ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" aria-current="page" href="admin.php">
-                                        <div class="row">
-                                            <div class="col-10">
-                                                <span>Admin Zone</span>
-                                            </div>
-                                            <div class="col-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
-                                                </svg>
-                                            </div>
-
-                                        </div>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                        <ul class="login logout nav flex-colum position-absolute w-100 bottom-0 mb-4">
-                            <?php if ($idUsuario == null) : ?>
-                                <li class="nav-item w-100">
-                                    <a class="btn btn-primary" aria-current="page" href="login.php" style="width: 90%;">
-                                        <div class="row" style="width: 100%;">
-                                            <div class="col-10">
-                                                <span>Log In</span>
-                                            </div>
-                                            <div class="col-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
-                                                </svg>
-                                            </div>
-
-                                        </div>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            <?php if ($idUsuario != null) : ?>
-                                <li class="nav-item w-100">
-                                    <a class="btn btn-primary" aria-current="page" href="index.php" style="width: 90%;">
+                        <?php endif; ?>
+                        <?php if ($usuario->getCategoria() != "anonimo") : ?>
+                            <li class="nav-item w-100">
+                                <form action="<?php $_SERVER["PHP_SELF"] ?>" class="logoutForm" method="post">
+                                    <a class="btn btn-primary logoutLink" aria-current="page" style="width: 90%;">
                                         <div class="row" style="width: 100%;">
                                             <div class="col-10">
                                                 <span>Log Out</span>
@@ -432,13 +441,14 @@
                                                     <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
                                                 </svg>
                                             </div>
-
                                         </div>
                                     </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </form>
+                                    <input type="hidden" name="logout">
+                                </form>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+
                 </div>
             </div>
         </nav>
@@ -448,37 +458,39 @@
             <h5>Catálogo de <?php echo ucfirst($categoria) ?></h5>
         </div>
         <div class="main-body container mt-4">
-            <form class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center" action="" method="post">
+            <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center">
                 <!--PHP ITEMS-->
                 <?php foreach ($arrayProductos as $i) : ?>
-                    <div class="item col card mb-5">
-                        <?php $url = "producto.php?id=" . $i->getId() ?>
-                        <a href="<?php echo $url ?>">
-                            <div class="card-header">
-                                <img class="image" src="data:image/png;base64,<?php echo $i->getImagen(); ?>" alt="">
-                            </div>
-                            <div class="card-body">
-                                <p class="h5"><?php echo $i->getNombre() ?></p>
-                                <p><?php echo $i->getDescripcion() ?></p>
-                                <b style="color: red;"><?php echo $i->getValor() ?></b>
-                            </div>
-                        </a>
-                        <?php if ($admin) :  ?>
-                            <input type="submit" class="btn btn-warning" value="Borrar">
-                        <?php endif; ?>
-                    </div>
+                    <form action="index.php" method="post">
+                        <div class="item col card mb-5">
+                            <?php $url = "producto.php?id=" . $i->getId() ?>
+                            <a href="<?php echo $url ?>">
+                                <div class="card-header">
+                                    <img class="image" src="data:image/png;base64,<?php echo $i->getImagen(); ?>" alt="">
+                                </div>
+                                <div class="card-body">
+                                    <p class="h5"><?php echo $i->getNombre() ?></p>
+                                    <p><?php echo $i->getDescripcion() ?></p>
+                                    <b style="color: red;"><?php echo $i->getValor() ?> €</b>
+                                </div>
+                            </a>
+                            <?php if ($usuario->getCategoria() == "admin") :  ?>
+                                <input type="submit" name="deleteProduct" class="btn btn-warning" value="Borrar">
+                                <input type="hidden" name="listProductID" value="<?php echo $i->getId() ?>">
+                            <?php endif; ?>
+                        </div>
+                    </form>
                 <?php endforeach; ?>
                 <!--PHP END-->
-            </form>
+            </div>
         </div>
 
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="../js/index.js"></script>
 </body>
 <footer>
-    <form action="" method="post">
-        <input type="submit" name="destroy" value="Destruir sesion">
-    </form>
+
 </footer>
 
 </html>

@@ -50,7 +50,7 @@
 .card {
     max-width: 400px;
     border: none;
-    *{
+    a *{
         border: none;
         background-color: rgba(255, 255, 255, 0);
     }
@@ -99,6 +99,12 @@ nav-link{
     color: red;
     font-size: 30px;
 }
+
+.alert{
+    display: block;
+      opacity: 0%;
+      transition: opacity 1s ease-in-out;
+  }
 
 
 
