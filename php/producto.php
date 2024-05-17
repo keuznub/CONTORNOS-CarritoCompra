@@ -25,6 +25,8 @@
     $categoria = null;
     $arrayCarrito = array();
     $arrayProductos = array();
+    $producto = null;
+    $idProducto = null;
     $defaultCategoria = "procesador";
 
 
@@ -37,14 +39,15 @@
     }
 
 
-    if (isset($_GET["categoria"])) {
-        $_SESSION["categoria"] = $_GET["categoria"];
-    }
-    if (!isset($_SESSION["categoria"])) {
-        $categoria = $defaultCategoria;
-        $_SESSION["categoria"] = $categoria;
+    if (isset($_GET["id"])) {
+        $idProducto = $_GET["id"];
     } else {
-        $categoria = $_SESSION["categoria"];
+        if (isset($_POST["id"])) {
+            $idProducto = $_POST["id"];
+        } else {
+            header("Location: oops.html");
+            die;
+        }
     }
     if (!isset($_SESSION["tipoUsuario"])) {
     } else {
@@ -52,7 +55,7 @@
             $admin = true;
         }
     }
-    if (isset($_POST["idUsuario"])) {
+    if (isset($_SESSION["idUsuario"])) {
         $idUsuario = $_SESSION["idUsuario"];
     }
     if (!isset($_SESSION["arrayCarrito"])) {
@@ -61,7 +64,6 @@
         $arrayCarrito = $_SESSION["arrayCarrito"];
     }
 
-    //PRODUCTO CLASE
     class Producto
     {
         private int $id;
@@ -103,8 +105,6 @@
             return $this->imagen;
         }
     }
-    //END PRODUCTO CLASE
-
     class Usuario
     {
         private int $id;
@@ -136,7 +136,6 @@
             return $this->categoria;
         }
     }
-
     class ProductoEnCarrito
     {
         private int $id;
@@ -178,18 +177,14 @@
         }
     }
 
-    $statement = $conexion->prepare("SELECT * FROM productos WHERE categoria = ?");
-    $statement->bind_param("s", $categoria);
+    $statement = $conexion->prepare("SELECT * FROM productos WHERE id = ?");
+    $statement->bind_param("i", $idProducto);
     $statement->execute();
     $result = $statement->get_result();
     while ($row = $result->fetch_row()) {
-        $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4],  base64_encode($row[5]));
-        array_push($arrayProductos, $producto);
+        $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4], base64_encode($row[5]));
     }
-
-    
-
-    if ($idUsuario != null && isset($_POST["login"])) {
+    if ($idUsuario != null) {
         $statement = $conexion->prepare("SELECT * FROM usuarios WHERE id = ?");
         $statement->bind_param("i", $idUsuario);
         $statement->execute();
@@ -197,90 +192,45 @@
         while ($row = $result->fetch_row()) {
             $usuario = new Usuario($row[0], $row[1], $row[2], $row[3], $row[4]);
         }
-        $statement = $conexion->prepare("SELECT p.id, p.nombre, p.descripcion, p.valor, c.cantidad
-        FROM productos p JOIN carrito c ON p.id =c.productId;");
-        $statement->bind_param("i", $idUsuario);
-        $statement->execute();
-        $result = $statement->get_result();
-        while ($row = $result->fetch_row()) {
-            array_push($arrayCarrito, new ProductoEnCarrito($row[0], $row[1], $row[2], $row[3], $row[4]));
-        }
-        $_SESSION["arrayCarrito"] = $arrayCarrito;
     }
-   
-    if(isset($_POST["delete"])){
-        foreach($arrayCarrito as $i => $v){
-            if($v->getID() == $_POST["deleteProductID"]){
-                if($v->getCantidad()<=1){
-                    unset($arrayCarrito[$i]);
-                }else{
-                    $v->setCantidad($v->getCantidad()-1);
-                }
+
+    if (isset($_POST["insert"])) {
+        $existe = false;
+        foreach($arrayCarrito as $i){
+            if($i->getID()==$idProducto){
+                $i->setCantidad($i->getCantidad()+1);
+                $existe = true;
             }
         }
-        $_SESSION["arrayCarrito"] = $arrayCarrito;
-        header("Location: $self");
-    }
-    
-
-    function selectFromProducto($idProducto, $columna)
-    {
-        $conexion = null;
-        try {
-            $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
-        } catch (Exception $E) {
-            header("Location: oops.html");
-            die;
+        if(!$existe){
+            array_push($arrayCarrito, new ProductoEnCarrito($producto->getId(), $producto->getNombre(), $producto->getDescripcion(),$producto->getValor(), 1));
         }
-        $statement = $conexion->prepare("SELECT ? FROM productos WHERE id = ?");
-        $statement->bind_param("si", $columna, $idProducto);
-        $statement->execute();
-        $result = $statement->get_result();
-        while ($row = $result->fetch_row()) {
-            return $row[0];
-        }
-        $conexion->close();
+        $_SESSION["arrayCarrito"]=$arrayCarrito;
     }
 
-    function selectCantidadFromCarrito($idProducto)
-    {
-        $conexion = null;
-        try {
-            $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
-        } catch (Exception $E) {
-            header("Location: oops.html");
-            die;
-        }
-        $statement = $conexion->prepare("SELECT ? FROM productos WHERE id = ?");
-        $statement->bind_param("si", $columna, $idProducto);
-        $statement->execute();
-        $result = $statement->get_result();
-        while ($row = $result->fetch_row()) {
-            return $row[0];
-        }
-        $conexion->close();
-    }
     $conexion->close();
-
     ?>
+
+    
     <header>
         <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
                 <div>
-                    <a class="navbar-brand" href="index.html">
+                    <a class="navbar-brand" href="index.php">
                         <img src="../imagen/bcComponentes.png" alt="" style="width:40px;">
                         <span class="nombreLogo">BComponentes</span></a>
+
                     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCatalogos" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                 </div>
 
-
+                
                 <form action="" method="post" class="input-group buscador" style="width: 20%">
                     <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
                     <input type="submit" class="btnbuscar btn btn-secondary" value="Buscar">
                 </form>
-
+                
 
                 <button class="btn btn-hover" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions"><img src="../imagen/carrito.png" width="20">
                     <div class="badge bg-danger rounded-circle position-relative" style="top: -10px; left: -10px;">
@@ -288,6 +238,7 @@
                     </div>
                     <span class="micarrito">
                         Mi Carrito
+
                     </span>
                 </button>
 
@@ -304,7 +255,6 @@
                     </div>
                     <div class="offcanvas-body">
                         <ul class="list-group">
-                            <!--PHP-->
                             <?php foreach ($arrayCarrito as $i) : ?>
                                 <li class="list-group-item mb-3">
                                     <div class="row">
@@ -327,15 +277,15 @@
                                         </div>
                                         <div class="col-5 d-flex justify-content-end">
                                             <div class="btn-toolbar" role="toolbar">
-                                                <form action="#" method="post">
-                                                    <input type="submit" name="delete" class="btn me-2"><img src="../imagen/basura.png" width="20px" alt="">
-                                                    <input type="hidden" name="deleteProductID" value="<?php echo $i->getId() ?>" class="btn me-2"><img src="../imagen/basura.png" width="20px" alt="">
+                                                <form action="#" method="post" id="deleteForm">
+                                                    <a class="submitEnlace"> <img src="../imagen/basura.png" width="20px" alt=""> </a>
+                                                    <input type="hidden" name="id" value="<?php echo $i->getId() ?>" class="btn me-2">
                                                 </form>
                                             </div>
                                         </div>
                                     </div>
                                 </li>
-                                <!--ENDPHP-->
+                                
                             <?php endforeach; ?>
                         </ul>
                         <div class="row">
@@ -443,42 +393,58 @@
             </div>
         </nav>
     </header>
-    <main>
-        <div class="main-head text-center py-4 bg-light">
-            <h5>Catálogo de <?php echo ucfirst($categoria) ?></h5>
-        </div>
-        <div class="main-body container mt-4">
-            <form class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center" action="" method="post">
-                <!--PHP ITEMS-->
-                <?php foreach ($arrayProductos as $i) : ?>
-                    <div class="item col card mb-5">
-                        <?php $url = "producto.php?id=" . $i->getId() ?>
-                        <a href="<?php echo $url ?>">
-                            <div class="card-header">
-                                <img class="image" src="data:image/png;base64,<?php echo $i->getImagen(); ?>" alt="">
-                            </div>
-                            <div class="card-body">
-                                <p class="h5"><?php echo $i->getNombre() ?></p>
-                                <p><?php echo $i->getDescripcion() ?></p>
-                                <b style="color: red;"><?php echo $i->getValor() ?></b>
-                            </div>
-                        </a>
-                        <?php if ($admin) :  ?>
-                            <input type="submit" class="btn btn-warning" value="Borrar">
-                        <?php endif; ?>
+                            
+    <main class="py-5">
+
+        <div class="row me-4 ms-4 producto">
+            <div class="col-lg-8  col-12 ms-auto columna1">
+                <div class="row row-cols-1 me-auto ms-auto">
+                    <div class="col d-flex justify-content-center imagen">
+                        <img class="image" src="data:image/png;base64,<?php echo $producto->getImagen(); ?>" alt="" width="70%">
                     </div>
-                <?php endforeach; ?>
-                <!--PHP END-->
-            </form>
+                    <hr>
+                    <div class="col mt-5 ms-auto especificaciones list-group">
+                        <div class="list-group-item">
+                            <span class="h4"><?php echo $producto->getNombre() ?></span>
+                        </div>
+                        <div class="list-group-item">
+                            <span><?php echo $producto->getDescripcion() ?></span>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-12 columna2 px-5">
+                <strong>Precio:</strong>
+                <br>
+                <b class="subtotal"><?php echo $producto->getValor() ?></b>
+                <div class="row precioArriba">
+                    <div class="col-12 text-center mt-4">
+                        <form action="<?php $_SERVER['PHP_SELF'] ?>" method="post">
+                            <input type="submit" class="btn btn-primary" name="insert" id="insert" value="Añadir a Carrito" style="width: 100%;">
+                            <input type="hidden" name="id" value="<?php echo $idProducto ?>">
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resumen  col-12 precioAbajo sticky-bottom">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <form action="<?php $_SERVER['PHP_SELF'] ?>" method="post">
+                            <input type="submit" class="btn btn-primary" name="insert" id="insert" value="Añadir a Carrito" style="width: 100%;">
+                            <input type="hidden" name="id" value="<?php echo $idProducto ?>">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
 
     </main>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
-<footer>
-    <form action="" method="post">
-        <input type="submit" name="destroy" value="Destruir sesion">
-    </form>
-</footer>
 
 </html>

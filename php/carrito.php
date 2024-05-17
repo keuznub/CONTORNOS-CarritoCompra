@@ -12,6 +12,15 @@
 </head>
 
 <body>
+    <?php
+    if(isset($_POST["delete"])){
+        $self = $_SERVER['PHP_SELF'];
+        $statement = $conexion->prepare("DELETE * FROM carrito WHERE userId = ? && productID = ?");
+        $statement->bind_param("ii", $idUsuario, $_POST["deleteProductID"]);
+        $statement->execute();
+        header("Location: $self");
+    }
+    ?>
     <header>
         <nav class="navbar navbar-collapse fixed-top">
             <div class="container-fluid">
