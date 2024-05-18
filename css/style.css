@@ -134,3 +134,7 @@ nav-link{
 
   }
 
+  .list-group-item{
+    border: 1px solid rgba(119, 118, 118, 0.418) !important;
+    border-radius: 1em !important;
+  }

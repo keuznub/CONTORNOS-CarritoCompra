@@ -268,6 +268,45 @@
         $_SESSION["arrayCarrito"] = $arrayCarrito;
         header("Location: $self");
     }
+
+    if (isset($_POST["reduce"])) {
+        $self = $_SERVER["PHP_SELF"];
+        foreach ($arrayCarrito as $i => $v) {
+            if ($v->getID() == $_POST["ProductID"]) {
+                if ($v->getCantidad() <= 1) {
+                    unset($arrayCarrito[$i]);
+                    $statement = $conexion->prepare("DELETE FROM carrito WHERE (userID = ? AND  productID = ?);");
+                    $statement->bind_param("ii", $usuario->getID(), $_POST["ProductID"]);
+                    $statement->execute();
+                } else {
+                    $v->setCantidad($v->getCantidad() - 1);
+                    $statement = $conexion->prepare("UPDATE carrito SET cantidad = ? WHERE (userID = ? AND  productID = ?);");
+                    $statement->bind_param("iii", $v->getCantidad(), $usuario->getID(), $_POST["ProductID"]);
+                    $statement->execute();
+                }
+            }
+        }
+
+        $_SESSION["arrayCarrito"] = $arrayCarrito;
+        header("Location: $self");
+    }
+
+    if (isset($_POST["add"])) {
+        $self = $_SERVER["PHP_SELF"];
+        foreach ($arrayCarrito as $i => $v) {
+            if ($v->getID() == $_POST["ProductID"]) {
+                $v->setCantidad($v->getCantidad() + 1);
+                $statement = $conexion->prepare("UPDATE carrito SET cantidad = ? WHERE (userID = ? AND  productID = ?);");
+                $statement->bind_param("iii", $v->getCantidad(), $usuario->getID(), $_POST["ProductID"]);
+                $statement->execute();
+            }
+        }
+        $_SESSION["arrayCarrito"] = $arrayCarrito;
+        header("Location: $self");
+    }
+
+
+
     function calcularTotal($array)
     {
         $total = 0;
@@ -294,9 +333,9 @@
                 </div>
 
 
-                <form action="" method="post" class="input-group buscador" style="width: 20%">
-                    <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
-                    <input type="submit" class="btnbuscar btn btn-secondary" value="Buscar">
+                <form action="index.php" method="post" class="input-group buscador" style="width: 20%">
+                    <input type="text" name="buscador" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
+                    <input type="submit" name="buscar" class="btnbuscar btn btn-secondary" value="Buscar">
                 </form>
 
                 <span class="btn-carrito-carrito oculto" aria-controls="offcanvasWithBothOptions"><img src="../imagen/carrito.png" width="45">
@@ -429,9 +468,9 @@
             </div>
         <?php else : ?>
             <div class="row me-4 ms-4">
-                <div class="col-md-8 ms-auto productos list-group">
+                <div class="row row-cols-1 col-md-8 col-12 ms-auto productos list-group">
                     <?php foreach ($arrayCarrito as $i) : ?>
-                        <div class="list-group-item mb-5">
+                        <div class="col-12 list-group-item mb-2">
                             <div class="row">
                                 <div class="col-10">
                                     <div class="h4"><?php echo $i->getNombre() ?></div>
@@ -457,22 +496,24 @@
                                     <div class=" btn-toolbar" role="toolbar">
                                         <form action="carrito.php" method="post" class="deleteForm">
                                             <a class="btn me-2 deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-secondary">+</button>
-                                                <button type="button" class="btn btn-secondary">-</button>
-                                            </div>
                                             <input type="hidden" class="deleteID" name="deleteProductID" value="<?php echo $i->getID() ?>">
                                             <input type="hidden" name="delete">
+                                        </form>
+                                        <form action="carrito.php" method="post" class="addForm">
+                                            <div class="btn-group" role="group">     
+                                                    <button type="submit" name="add" class="btn btn-secondary">+</button>
+                                                    <button type="submit" name="reduce" class="btn btn-secondary">-</button>
+                                            </div>
+                                            <input type="hidden" class="ProductID" name="ProductID" value="<?php echo $i->getID() ?>">
                                         </form>
                                     </div>
                                 </div>
                             </div>
 
-
-                        <?php endforeach; ?>
                         </div>
+                    <?php endforeach; ?>
                 </div>
-                <div class="col-md-4 resumen list-group ms-auto me-auto">
+                <div class="col-md-4 col-12 resumen list-group ms-auto me-auto">
                     <div class="list-group-item">
                         <span class="h6 text-body-secondary">Resumen</span>
                         <br>
@@ -496,7 +537,8 @@
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

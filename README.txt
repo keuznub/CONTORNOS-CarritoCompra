@@ -1,27 +1,18 @@
 /*SCRIPTS MySQL BASE DE DATOS LOCAL CON XAMPP*/
 
-CREATE DATABASE IF NOT EXISTS BreixoComponentes;
-USE BreixoComponentes;
-CREATE TABLE IF NOT EXISTS Productos(
-id INT auto_increment primary KEY,
-nombre VARCHAR(30),
-descripcion VARCHAR(50),
-precio DOUBLE,
-categoria ENUM("procesador","placaBase"),
-imagen LONGBLOB
-);
+Usando XAMPP y MySQL Workbench, ejecuta el script dentro de la carpeta mySQLScript.
 
-SELECT * FROM Productos;
+Tienes imagenes de muestra de componentes para subir a la página en la carpeta ImagenesMuestra.
 
-INSERT INTO Productos(nombre, descripcion, precio, categoria)
-VALUES("prueba1", "descripcionTest", "20.5", "procesador2");
-
-DELETE FROM Productos;
+Para acceder a la admin zone(para subir productos) logeate con un usuario admin y accede a la pestaña de productos arriba izquierda, veras admin zone.
 
 
-USE breixocomponentes;
-CREATE TABLE IF NOT EXISTS usuarios(
-usuario VARCHAR(20),
-contraseña VARCHAR(20),
-categoria ENUM("admin","ciente")
-);
+Usuarios:
+(usuario, contraseña, categoria)
+("antonio", "antonio", "admin");
+("pepe", "pepe", "admin");
+("breixo", "breixo", "cliente");
+
+Si no logeas con nadie la categoria será anonimo y no se guardará el carrito en base de datos.
+
+Las imagenes no estan comprobadas si son CC o qué asi que cuidao.

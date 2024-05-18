@@ -213,9 +213,9 @@
                 </div>
 
 
-                <form action="" method="post" class="input-group buscador" style="width: 20%">
-                    <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
-                    <input type="submit" class="btnbuscar btn btn-secondary" value="Buscar">
+                <form action="index.php" method="post" class="input-group buscador" style="width: 20%">
+                    <input type="text" name="buscador" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
+                    <input type="submit" name="buscar" class="btnbuscar btn btn-secondary" value="Buscar">
                 </form>
 
 
@@ -287,8 +287,8 @@
                             </ul>
                             <div class="row">
                             <div class="col-12 text-center mt-4">
-                                <form action="carrito.html">
-                                    <input type="submit" class="btn btn-primary btn-login" name="" id="" value="Ver en Carrito" style="width: 90%;">
+                                <form action="carrito.php" method="post">
+                                    <input type="submit" class="btn btn-primary btn-login" name="verCarrito" id="verCarrito" value="Ver en Carrito" style="width: 90%;">
                                 </form>
                             </div>
                         </div>

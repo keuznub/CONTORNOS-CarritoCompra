@@ -82,6 +82,8 @@
         $arrayCarrito = $_SESSION["arrayCarrito"];
     }
 
+
+
     //PRODUCTO CLASE
     class Producto
     {
@@ -205,15 +207,27 @@
         $statement->execute();
         header("Location: index.php");
     }
-
-    $statement = $conexion->prepare("SELECT * FROM productos WHERE categoria = ?");
-    $statement->bind_param("s", $categoria);
-    $statement->execute();
-    $result = $statement->get_result();
-    while ($row = $result->fetch_row()) {
-        $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4],  base64_encode($row[5]));
-        array_push($arrayProductos, $producto);
+    if(!isset($_POST["buscar"])){
+        $statement = $conexion->prepare("SELECT * FROM productos WHERE categoria = ?");
+        $statement->bind_param("s", $categoria);
+        $statement->execute();
+        $result = $statement->get_result();
+        while ($row = $result->fetch_row()) {
+            $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4],  base64_encode($row[5]));
+            array_push($arrayProductos, $producto);
+        }
+    }else{
+        $statement = $conexion->prepare("SELECT * FROM productos WHERE nombre LIKE ?");
+        $search = "%".$_POST["buscador"]."%";
+        $statement->bind_param("s", $search);
+        $statement->execute();
+        $result = $statement->get_result();
+        while ($row = $result->fetch_row()) {
+            $producto = new Producto($row[0], $row[1], $row[2], $row[3], $row[4],  base64_encode($row[5]));
+            array_push($arrayProductos, $producto);
+        }
     }
+    
 
 
 
@@ -277,9 +291,9 @@
                 </div>
 
 
-                <form action="" method="post" class="input-group buscador" style="width: 20%">
-                    <input type="text" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
-                    <input type="submit" class="btnbuscar btn btn-secondary" value="Buscar">
+                <form action="index.php" method="post" class="input-group buscador" style="width: 20%">
+                    <input type="text" name="buscador" class="form-control" placeholder="Buscar..." aria-describedby="basic-addon2">
+                    <input type="submit" name="buscar" class="btnbuscar btn btn-secondary" value="Buscar">
                 </form>
 
 
@@ -477,7 +491,11 @@
     </header>
     <main>
         <div class="main-head text-center py-4 bg-light">
+            <?php if(isset($_POST["buscar"])): ?>
+            <h5>Resultado de busqueda: "<?php echo $_POST["buscador"] ?>" </h5>
+            <?php else: ?>
             <h5>Catálogo de <?php echo ucfirst($categoria) ?></h5>
+            <?php endif; ?>
         </div>
         <div class="main-body container mt-4">
             <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 justify-content-center">
