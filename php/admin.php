@@ -27,29 +27,11 @@
     $arrayProductos = array();
     $defaultCategoria = "procesador";
 
-
-
-
-
     try {
         $conexion = mysqli_connect("localhost", "root", "", "breixocomponentes");
     } catch (Exception $E) {
         header("Location: oops.html");
         die;
-    }
-
-    if (isset($_POST["login"])) {
-        session_destroy();
-        session_start();
-        $statement = $conexion->prepare("SELECT * FROM usuarios WHERE usuario = ? && contraseña = ?");
-        $statement->bind_param("ss", $_POST["usuario"], $_POST["contraseña"]);
-        $statement->execute();
-        $result = $statement->get_result();
-        if (!$result->num_rows == 0) {
-            $idUsuario = $result->fetch_row()[0];
-        } else {
-            header("Location: login.php?loginFail=true");
-        }
     }
 
     if (isset($_GET["categoria"])) {
@@ -247,7 +229,7 @@
                 </button>
 
 
-                <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                <div class="offcanvas offcanvas-end carritoCanvas" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
                     <div class="offcanvas-header">
                         <?php if ($usuario->getCategoria() == "anonimo") : ?>
                             <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img src="../imagen/carrito.png" width="20">Carrito</h5>
@@ -258,55 +240,77 @@
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <ul class="list-group">
-                            <!--PHP-->
-                            <?php foreach ($arrayCarrito as $i) : ?>
-                                <li class="list-group-item mb-3">
-                                    <div class="row">
-                                        <div class="col-10">
-                                            <div class="h4">
-                                                <?php
-                                                echo $i->getNombre();
-                                                ?>
+                        <?php if (count($arrayCarrito) > 0) : ?>
+                            <ul class="list-group">
+                                <!--PHP-->
+                                <?php foreach ($arrayCarrito as $i) : ?>
+                                    <li class="list-group-item mb-3 itemCarrito">
+                                        <div class="row">
+                                            <div class="col-10">
+                                                <a href='<?php echo "producto.php?id=" . $i->getID() ?>'>
+                                                    <div class="h4">
+                                                        <?php
+                                                        echo $i->getNombre();
+                                                        ?>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-2 text-end">
+                                                <div class="">x<span class="cantidad"><?php echo $i->getCantidad() ?></span></div>
                                             </div>
                                         </div>
-                                        <div class="col-2 text-end">
-                                            <div class="">x<span class="cantidad"><?php echo $i->getCantidad() ?></span></div>
+                                        <div class="row">
+                                            <div class="col-7">
+                                                <span class="description">
+                                                    <?php echo $i->getDescripcion() ?>
+                                                </span>
+                                            </div>
+                                            <div class="col-5 d-flex justify-content-end" style="color:red">
+                                                <b> <?php echo $i->getValor() * $i->getCantidad() ?>€ </b>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-7">
-                                            <span class="description">
-                                                <?php echo $i->getDescripcion() ?>
-                                            </span>
-                                        </div>
-                                        <div class="col-5 d-flex justify-content-end" style="color:red">
-                                            <b> <?php echo $i->getValor() * $i->getCantidad() ?>€ </b>
-                                        </div>
-                                    </div>
-                                    <div class="row">
+                                        <div class="row">
 
-                                        <div class="col-12 d-flex justify-content-end">
-                                            <div class="btn-toolbar" role="toolbar">
-                                                <form action="#" class="deleteForm" method="post">
-                                                    <a class="deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
-                                                    <input type="hidden" name="deleteProductID" class="deleteID" value="<?php echo $i->getId() ?>">
-                                                    <input type="hidden" name="delete">
-                                                </form>
+                                            <div class="col-12 d-flex justify-content-end">
+                                                <div class="btn-toolbar" role="toolbar">
+                                                    <form action="#" class="deleteForm" method="post">
+                                                        <a class="deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
+                                                        <input type="hidden" name="deleteProductID" class="deleteID" value="<?php echo $i->getId() ?>">
+                                                        <input type="hidden" name="delete">
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </li>
-                                <!--ENDPHP-->
-                            <?php endforeach; ?>
-                        </ul>
-                        <div class="row">
+                                    </li>
+                                    <!--ENDPHP-->
+                                <?php endforeach; ?>
+                            </ul>
+                            <div class="row">
                             <div class="col-12 text-center mt-4">
                                 <form action="carrito.html">
-                                    <input type="submit" class="btn btn-primary" name="" id="" value="Ver en Carrito" style="width: 90%;">
+                                    <input type="submit" class="btn btn-primary btn-login" name="" id="" value="Ver en Carrito" style="width: 90%;">
                                 </form>
                             </div>
                         </div>
+                        <?php else : ?>
+                            <div class="row row-cols-1 justify-content-center">
+                                <div class="col d-flex justify-content-center rounded-circle lupa" style="max-width: 100px;">
+                                    <svg fill="#000000" width="80px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="m9 4.45-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1-2-2 2-2zm2.77 6.63c.77-1.01 1.23-2.27 1.23-3.63 0-3.31-2.69-6-6-6s-6 2.69-6 6 2.69 6 6 6c1.37 0 2.63-.46 3.64-1.24l2.79 2.79 1.13-1.13zm-4.87.76c-2.48 0-4.49-2.02-4.49-4.5s2.02-4.5 4.49-4.5 4.5 2.02 4.5 4.5-2.03 4.5-4.5 4.5z" />
+                                    </svg>
+                                </div>
+                                <div class="col d-flex justify-content-center">
+                                    <span class="h4">Carrito vacío</span>
+                                </div>
+                                <div class="col d-flex justify-content-center mb-4">
+                                    <span class="">Busca mas contenido en la pagina</span>
+                                </div>
+                                <div class="col d-flex justify-content-center">
+                                    <a href="" class="btn btn-primary btn-login">Explorar Articulos</a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
                     </div>
                 </div>
                 <div class="offcanvas offcanvas-start productosCanvas" data-bs-scroll="true" tabindex="-1" id="offcanvasCatalogos" aria-labelledby="offcanvasCatalogos">
@@ -366,9 +370,9 @@
                     </ul>
                     <ul class="login logout nav flex-colum position-absolute w-100 bottom-0 mb-4">
                         <?php if ($usuario->getCategoria() == "anonimo") : ?>
-                            <li class="nav-item w-100">
-                                <a class="btn btn-primary" aria-current="page" href="login.php" style="width: 90%;">
-                                    <div class="row" style="width: 100%;">
+                            <li class="nav-item w-100 d-flex justify-content-center" style="height: 50px;">
+                                <a class="btn btn-primary btn-login" aria-current="page" href="login.php" style="width: 80%;">
+                                    <div class="row  mt-1" style="width: 100%;">
                                         <div class="col-10">
                                             <span>Log In</span>
                                         </div>
@@ -384,9 +388,9 @@
                         <?php endif; ?>
                         <?php if ($usuario->getCategoria() != "anonimo") : ?>
                             <li class="nav-item w-100">
-                                <form action="<?php $_SERVER["PHP_SELF"] ?>" class="logoutForm" method="post">
-                                    <a class="btn btn-primary logoutLink" aria-current="page" style="width: 90%;">
-                                        <div class="row" style="width: 100%;">
+                                <form action="<?php $_SERVER["PHP_SELF"] ?>" class="logoutForm d-flex justify-content-center" method="post" style="height: 50px;">
+                                    <a class="btn btn-primary logoutLink btn-logout" aria-current="page" style="width: 80%;">
+                                        <div class="row  mt-1" style="width: 100%;">
                                             <div class="col-10">
                                                 <span>Log Out</span>
                                             </div>
@@ -411,24 +415,24 @@
         <div class="main-head text-start  py-5 d-flex justify-content-center">
             <h5>Subir a base de datos</h5>
         </div>
-        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" enctype="multipart/form-data" method="post" onsubmit=" return validate()">
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" id="insertForm" enctype="multipart/form-data" method="post">
             <div class="row row-cols-1 d-flex justify-content-center">
                 <div class="col-6">
                     <div class="form-floating">
-                        <input type="text" class="form-control" name="nombre" placeholder="" required>
+                        <input type="text" class="form-control" maxlength="20" name="nombre" id="nombre" placeholder="" required>
                         <label for="" class="form-floating" style="width: 100%;">Nombre del producto</label>
                     </div>
                     <div class="form-floating mt-3">
-                        <textarea type="text" class="form-control" name="descripcion" placeholder="" style="height: 150px !important;" required></textarea>
+                        <textarea type="text" class="form-control" maxlength="50" name="descripcion" id="descripcion" placeholder="" style="height: 150px !important;" required></textarea>
                         <label for="" class="form-floating" style="width: 100%;">Descripcion</label>
                     </div>
                     <div class="form-floating mt-3">
-                        <input type="number" class="form-control" name="precio" placeholder="" required>
+                        <input type="number" class="form-control" name="precio" max="2147483647" id="precio" placeholder="" required>
                         <label for="" class="form-floating" style="width: 100%;">Precio</label>
                     </div>
                     <div class="mt-3">
-                        <select class="form-select mb-3" name="categoria" required>
-                            <option selected>Selecciona una categoria de producto</option>
+                        <select class="form-select mb-3" name="categoria" id="categoria" required>
+                            <option value="" selected>Selecciona una categoria de producto</option>
                             <option value="procesador">Procesador</option>
                             <option value="placa Base">Placa Base</option>
                         </select>
@@ -438,22 +442,22 @@
                         <input type="file" name="imagen" id="imagen" class="form-control" required>
                     </div>
                     <div class="mt-3 sticky-bottom text-center">
-                        <input type="submit" class="btn btn-primary" name="insert" id="imagen" value="Subir producto" class="form-control" placeholder="" style="width: 100%;" required>
+                        <input type="submit" class="btn btn-primary" name="insert" id="insert" value="Subir producto" class="form-control" placeholder="" style="width: 100%;" required>
                     </div>
                 </div>
             </div>
         </form>
         <?php if (isset($_GET["fail"])) : ?>
             <?php if ($_GET["fail"]=="false") : ?>
-            <div class="row mt-4">
-                <div class="col-sm-8">
+            <div class="row mt-4 d-flex justify-content-center sticky-bottom">
+                <div class="col-sm-8 ">
                     <div class="alert alert-success" id="alertAdminSuccess"></div>
                 </div>
             </div>
             <?php endif; ?>
-            <?php if (!$_GET["fail"]=="false") : ?>
-            <div class="row mt-4">
-                <div class="col-sm-8">
+            <?php if (!($_GET["fail"]=="false")) : ?>
+            <div class="row mt-4 d-flex justify-content-center sticky-bottom">
+                <div class="col-sm-8 ">
                     <div class="alert alert-danger" id="alertAdminFail"></div>
                 </div>
             </div>

@@ -73,10 +73,9 @@ main{
     margin-top: 3em;
 }
 
-.main-body a{
+.main-body a,.itemCarrito a{
     text-decoration: none;
-    color: black !important;
-    
+    color: black !important;  
 }
 
 nav-link{
@@ -106,7 +105,32 @@ nav-link{
       transition: opacity 1s ease-in-out;
   }
 
+  .btn-login{
+    background-color: rgb(238, 137, 5) !important;
+    border-color: rgb(238, 137, 5) !important ;
+    transition:  0.2s ease;
+  }
 
+  .btn-login:hover{
+    background-color: rgb(238, 110, 5) !important;
+    border-color: rgb(238, 110, 5)  !important ;
+  } 
 
+  .btn-logout{
+    color: black;
+    background-color: rgba(238, 137, 5, 0) !important;
+    border-color: rgb(238, 137, 5) !important ;
+  }
 
+  .btn-logout:hover{
+    color: white;
+    background-color: rgb(238, 137, 5) !important;
+    border-color: rgb(238, 137, 5) !important ;
+
+  }
+
+  .btn-carrito-carrito *{
+    visibility: hidden;
+
+  }
 

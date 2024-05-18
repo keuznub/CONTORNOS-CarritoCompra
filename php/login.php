@@ -234,7 +234,7 @@
                 </button>
 
 
-                <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                <div class="offcanvas offcanvas-end carritoCanvas" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
                     <div class="offcanvas-header">
                         <?php if ($usuario->getCategoria() == "anonimo") : ?>
                             <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"><img src="../imagen/carrito.png" width="20">Carrito</h5>
@@ -245,55 +245,77 @@
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <ul class="list-group">
-                            <!--PHP-->
-                            <?php foreach ($arrayCarrito as $i) : ?>
-                                <li class="list-group-item mb-3">
-                                    <div class="row">
-                                        <div class="col-10">
-                                            <div class="h4">
-                                                <?php
-                                                echo $i->getNombre();
-                                                ?>
+                        <?php if (count($arrayCarrito) > 0) : ?>
+                            <ul class="list-group">
+                                <!--PHP-->
+                                <?php foreach ($arrayCarrito as $i) : ?>
+                                    <li class="list-group-item mb-3 itemCarrito">
+                                        <div class="row">
+                                            <div class="col-10">
+                                                <a href='<?php echo "producto.php?id=" . $i->getID() ?>'>
+                                                    <div class="h4">
+                                                        <?php
+                                                        echo $i->getNombre();
+                                                        ?>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-2 text-end">
+                                                <div class="">x<span class="cantidad"><?php echo $i->getCantidad() ?></span></div>
                                             </div>
                                         </div>
-                                        <div class="col-2 text-end">
-                                            <div class="">x<span class="cantidad"><?php echo $i->getCantidad() ?></span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-7">
-                                            <span class="description">
-                                                <?php echo $i->getDescripcion() ?>
-                                            </span>
-                                        </div>
-                                        <div class="col-5 d-flex justify-content-end" style="color:red">
-                                            <b> <?php echo $i->getValor()*$i->getCantidad() ?>€ </b>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        
-                                        <div class="col-12 d-flex justify-content-end">
-                                            <div class="btn-toolbar" role="toolbar">
-                                                <form action="#" class="deleteForm" method="post">
-                                                    <a class="deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
-                                                    <input type="hidden" name="deleteProductID" class="deleteID" value="<?php echo $i->getId() ?>">
-                                                    <input type="hidden" name="delete">
-                                                </form>
+                                        <div class="row">
+                                            <div class="col-7">
+                                                <span class="description">
+                                                    <?php echo $i->getDescripcion() ?>
+                                                </span>
+                                            </div>
+                                            <div class="col-5 d-flex justify-content-end" style="color:red">
+                                                <b> <?php echo $i->getValor() * $i->getCantidad() ?>€ </b>
                                             </div>
                                         </div>
-                                    </div>
-                                </li>
-                                <!--ENDPHP-->
-                            <?php endforeach; ?>
-                        </ul>
-                        <div class="row">
+                                        <div class="row">
+
+                                            <div class="col-12 d-flex justify-content-end">
+                                                <div class="btn-toolbar" role="toolbar">
+                                                    <form action="#" class="deleteForm" method="post">
+                                                        <a class="deleteLink"><img src="../imagen/basura.png" width="20px" alt=""></a>
+                                                        <input type="hidden" name="deleteProductID" class="deleteID" value="<?php echo $i->getId() ?>">
+                                                        <input type="hidden" name="delete">
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!--ENDPHP-->
+                                <?php endforeach; ?>
+                            </ul>
+                            <div class="row">
                             <div class="col-12 text-center mt-4">
                                 <form action="carrito.html">
-                                    <input type="submit" class="btn btn-primary" name="" id="" value="Ver en Carrito" style="width: 90%;">
+                                    <input type="submit" class="btn btn-primary btn-login" name="" id="" value="Ver en Carrito" style="width: 90%;">
                                 </form>
                             </div>
                         </div>
+                        <?php else : ?>
+                            <div class="row row-cols-1 justify-content-center">
+                                <div class="col d-flex justify-content-center rounded-circle lupa" style="max-width: 100px;">
+                                    <svg fill="#000000" width="80px" height="100px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="m9 4.45-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1-2-2 2-2zm2.77 6.63c.77-1.01 1.23-2.27 1.23-3.63 0-3.31-2.69-6-6-6s-6 2.69-6 6 2.69 6 6 6c1.37 0 2.63-.46 3.64-1.24l2.79 2.79 1.13-1.13zm-4.87.76c-2.48 0-4.49-2.02-4.49-4.5s2.02-4.5 4.49-4.5 4.5 2.02 4.5 4.5-2.03 4.5-4.5 4.5z" />
+                                    </svg>
+                                </div>
+                                <div class="col d-flex justify-content-center">
+                                    <span class="h4">Carrito vacío</span>
+                                </div>
+                                <div class="col d-flex justify-content-center mb-4">
+                                    <span class="">Busca mas contenido en la pagina</span>
+                                </div>
+                                <div class="col d-flex justify-content-center">
+                                    <a href="" class="btn btn-primary btn-login">Explorar Articulos</a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
                     </div>
                 </div>
                 <div class="offcanvas offcanvas-start productosCanvas" data-bs-scroll="true" tabindex="-1" id="offcanvasCatalogos" aria-labelledby="offcanvasCatalogos">
@@ -301,13 +323,44 @@
                         <span class="h5">Productos</span>
                         <button type="button" class="btn-close" id="cierreOffcanvasCatalogo" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
-                    
-                        <ul class="nav flex-column ">
+
+                    <ul class="nav flex-column ">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="index.php?categoria=procesador">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <span>Procesadores</span>
+                                    </div>
+                                    <div class="col-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                        </svg>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="index.php?categoria=placa Base">
+                                <div class="row">
+                                    <div class="col-10">
+                                        <span>Placas Base</span>
+                                    </div>
+                                    <div class="col-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+                                        </svg>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </li>
+                        <?php if ($usuario->getCategoria() == "admin") : ?>
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="index.php?categoria=procesador">
+                                <a class="nav-link" aria-current="page" href="admin.php">
                                     <div class="row">
                                         <div class="col-10">
-                                            <span>Procesadores</span>
+                                            <span>Admin Zone</span>
                                         </div>
                                         <div class="col-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
@@ -318,11 +371,15 @@
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="index.php?categoria=placa Base">
-                                    <div class="row">
+                        <?php endif; ?>
+                    </ul>
+                    <ul class="login logout nav flex-colum position-absolute w-100 bottom-0 mb-4">
+                        <?php if ($usuario->getCategoria() == "anonimo") : ?>
+                            <li class="nav-item w-100 d-flex justify-content-center" style="height: 50px;">
+                                <a class="btn btn-primary btn-login" aria-current="page" href="login.php" style="width: 80%;">
+                                    <div class="row  mt-1" style="width: 100%;">
                                         <div class="col-10">
-                                            <span>Placas Base</span>
+                                            <span>Log In</span>
                                         </div>
                                         <div class="col-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
@@ -333,70 +390,35 @@
                                     </div>
                                 </a>
                             </li>
-                            <?php if ($usuario->getCategoria() == "admin") : ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" aria-current="page" href="admin.php">
-                                        <div class="row">
+                        <?php endif; ?>
+                        <?php if ($usuario->getCategoria() != "anonimo") : ?>
+                            <li class="nav-item w-100">
+                                <form action="<?php $_SERVER["PHP_SELF"] ?>" class="logoutForm d-flex justify-content-center" method="post" style="height: 50px;">
+                                    <a class="btn btn-primary logoutLink btn-logout" aria-current="page" style="width: 80%;">
+                                        <div class="row  mt-1" style="width: 100%;">
                                             <div class="col-10">
-                                                <span>Admin Zone</span>
+                                                <span>Log Out</span>
                                             </div>
                                             <div class="col-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
                                                     <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
                                                 </svg>
                                             </div>
-
                                         </div>
                                     </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                        <ul class="login logout nav flex-colum position-absolute w-100 bottom-0 mb-4">
-                            <?php if ($usuario->getCategoria() == "anonimo") : ?>
-                                <li class="nav-item w-100">
-                                    <a class="btn btn-primary" aria-current="page" href="login.php" style="width: 90%;">
-                                        <div class="row" style="width: 100%;">
-                                            <div class="col-10">
-                                                <span>Log In</span>
-                                            </div>
-                                            <div class="col-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
-                                                </svg>
-                                            </div>
+                                    <input type="hidden" name="logout">
+                                </form>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
 
-                                        </div>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            <?php if ($usuario->getCategoria() != "anonimo") : ?>
-                                <li class="nav-item w-100">
-                                    <form action="<?php $_SERVER["PHP_SELF"] ?>" class="logoutForm" method="post">
-                                        <a class="btn btn-primary logoutLink" aria-current="page" style="width: 90%;">
-                                            <div class="row" style="width: 100%;">
-                                                <div class="col-10">
-                                                    <span>Log Out</span>
-                                                </div>
-                                                <div class="col-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                                                        <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <input type="hidden" name="logout">
-                                    </form>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    
                 </div>
             </div>
         </nav>
     </header>
     <main>
         <div class="container py-5  ms-auto">
-            <form class="row" action="index.php" method="post">
+            <form class="row" action="<?php echo isset($_GET["toCarrito"])? "carrito.php" : "index.php" ?>" method="post">
                 <div class="row mb-5">
                     <div class="col-12 text-center">
                         <span class="h2">BreixoComponentes</span>
@@ -416,7 +438,7 @@
                     </div>
                     <div class="col-md-6 mt-3">
                         <div class="form-floating mb-3">
-                            <input class="form-control" type="text" id="contraseña" name="contraseña" placeholder="" required>
+                            <input class="form-control" type="password" id="contraseña" name="contraseña" placeholder="" required>
                             <label for="contraseña">Contraseña</label>
                         </div>
                     </div>
@@ -424,13 +446,20 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-4 mt-3">
-                        <input class="form-control btn btn-outline-primary" name="login" type="submit" value="Log In">
+                        <input class="form-control btn btn-primary btn-login" name="login" type="submit" value="Log In">
                     </div>
                 </div>
                 <?php if(isset($_GET["loginFail"])):?>
                 <div class="row mt-4">
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 sticky-bottom">
                             <div class="alert alert-danger" id="alerta"></div>
+                        </div>
+                </div>
+                <?php endif; ?>
+                <?php if(isset($_GET["toCarrito"])):?>
+                <div class="row mt-4">
+                        <div class="col-sm-8 sticky-bottom">
+                            <div class="alert alert-warning" id="carritoAlert"></div>
                         </div>
                 </div>
                 <?php endif; ?>
